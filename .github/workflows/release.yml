@@ -1,5 +1,5 @@
-# RELEASE del Portale ITS - la pipeline multi-stadio.
-# Sorgente -> Build -> Collaudo su finto-AWS -> APPROVAZIONE UMANA -> Produzione.
+# RELEASE del Portale ITS - la pipeline multi-stadio (Piano B: pubblicazione su branch gh-pages)
+# Sorgente -> Build -> Collaudo su finto-AWS -> APPROVAZIONE UMANA -> Produzione (su gh-pages)
 name: Release
 
 on:
@@ -21,6 +21,7 @@ concurrency:
 
 jobs:
 
+  # ---------- STADIO 1: BUILD ----------
   build:
     name: 1. Build
     runs-on: ubuntu-latest
@@ -53,6 +54,7 @@ jobs:
           path: dist/
           retention-days: 30
 
+  # ---------- STADIO 2: COLLAUDO SU AMBIENTE DI TEST (finto-AWS) ----------
   collaudo-test:
     name: 2. Collaudo su test
     needs: build
@@ -116,6 +118,7 @@ jobs:
           grep -q index.html /tmp/ls.txt || { echo "::error::index.html non pubblicato"; exit 1; }
           echo "### Collaudo su test superato su \`$SITO\`" >> "$GITHUB_STEP_SUMMARY"
 
+  # ---------- STADIO 3: APPROVAZIONE UMANA ----------
   approvazione:
     name: 3. Approvazione per la produzione
     needs: [build, collaudo-test]
@@ -127,31 +130,31 @@ jobs:
           echo "Release ${{ needs.build.outputs.versione }} approvata da ${{ github.actor }}"
           echo "### Approvata la release \`${{ needs.build.outputs.versione }}\`" >> "$GITHUB_STEP_SUMMARY"
 
+  # ---------- STADIO 4: PRODUZIONE (PIANO B – pubblicazione su branch gh-pages) ----------
   pubblica:
-    name: 4. Pubblicazione in produzione
+    name: 4. Pubblicazione in produzione (Piano B)
     needs: [build, approvazione]
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      contents: write   # necessario per pushare su gh-pages
     steps:
+      - uses: actions/checkout@v7
+
       - uses: actions/download-artifact@v8
         with:
           name: portale-dist
           path: dist
 
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-      - id: deploy
-        uses: actions/deploy-pages@v5
-
-      - name: Cronaca della release
+      - name: Pubblica sul branch gh-pages
         run: |
-          echo "### In produzione la versione \`${{ needs.build.outputs.versione }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "${{ steps.deploy.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B gh-pages
+          # Rimuovi tutto tranne .git e la cartella dist
+          find . -maxdepth 1 ! -name . ! -name .git ! -name dist -exec rm -rf {} +
+          # Sposta il contenuto di dist nella root
+          mv dist/* . && rmdir dist
+          # Aggiungi e committa
+          git add -A
+          git commit -m "Pubblica release ${{ needs.build.outputs.versione }}"
+          git push -f origin gh-pages
