@@ -1,0 +1,11 @@
+{
+  "name": "portale-its",
+  "version": "0.0.1",
+  "description": "sito corsi",
+  "type": "module",
+  "scripts": {
+    "build": "node src/build.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {}
+}

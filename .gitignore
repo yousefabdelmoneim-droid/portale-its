@@ -1,0 +1,15 @@
+# Dipendenze
+node_modules/
+
+# Output della build
+dist/
+
+# File di ambiente e segreti
+.env
+*.pem
+config/impostazioni.txt
+
+# File di stato Terraform
+*.tfstate
+*.tfstate.*
+.terraform/

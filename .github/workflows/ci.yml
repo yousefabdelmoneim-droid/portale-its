@@ -1,0 +1,124 @@
+# CI del Portale ITS - i GATE DI QUALITA.
+# Gira su ogni pull request: se un gate rosseggia, quel codice non entra in main.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+
+env:
+  GATE_CHECKS: >-
+    CKV_AWS_18,CKV_AWS_19,CKV_AWS_20,CKV_AWS_21,CKV_AWS_28,CKV_AWS_119,
+    CKV_AWS_7,CKV_AWS_53,CKV_AWS_54,CKV_AWS_55,CKV_AWS_56,CKV2_AWS_6,CKV_ITS_1
+
+jobs:
+
+  rilevamento:
+    name: Struttura del progetto
+    runs-on: ubuntu-latest
+    outputs:
+      cfn: ${{ steps.binario.outputs.cfn }}
+      tf: ${{ steps.binario.outputs.tf }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Quale binario di infrastruttura c'è in questo repo?
+        id: binario
+        run: |
+          if [ -f infra/portale-its.yaml ]; then echo "cfn=true" >> "$GITHUB_OUTPUT"; else echo "cfn=false" >> "$GITHUB_OUTPUT"; fi
+          if [ -f infra/tf/main.tf ];      then echo "tf=true"  >> "$GITHUB_OUTPUT"; else echo "tf=false"  >> "$GITHUB_OUTPUT"; fi
+          if [ ! -f infra/portale-its.yaml ] && [ ! -f infra/tf/main.tf ]; then
+            echo "::error::Nessun file di infrastruttura: qualcuno ha cancellato il codice IaC."
+            exit 1
+          fi
+          echo "trovato:"; ls -1 infra infra/tf 2>/dev/null || true
+
+  applicazione:
+    name: App - install, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Installazione bloccata dal lockfile
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build del sito
+        run: npm run build
+
+      - name: Nessun segreto nel sito pubblicato
+        run: bash script/sniffa-segreti.sh dist
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: portale-dist
+          path: dist/
+          retention-days: 7
+
+  segreti:
+    name: Segreti
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Sniffer fatto in casa
+        run: bash script/sniffa-segreti.sh .
+
+      - name: Scansione con checkov
+        run: |
+          pip install --quiet checkov
+          checkov -d . --framework secrets --enable-secret-scan-all-files \
+            --skip-path node_modules --skip-path dist --compact
+
+  infra-terraform:
+    name: IaC - Terraform
+    needs: rilevamento
+    if: needs.rilevamento.outputs.tf == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Terraform
+        run: |
+          curl -sSLo tf.zip https://releases.hashicorp.com/terraform/1.15.8/terraform_1.15.8_linux_amd64.zip
+          sudo unzip -oq tf.zip -d /usr/local/bin
+          rm tf.zip && terraform version
+
+      - name: Formattazione
+        working-directory: infra/tf
+        run: terraform fmt -check -recursive
+
+      - name: Inizializzazione e validazione
+        working-directory: infra/tf
+        run: |
+          terraform init -input=false -backend=false
+          terraform validate
+
+      - name: Regole del capitolato (policy as code)
+        run: |
+          pip install --quiet checkov
+          checkov -d infra/tf --framework terraform \
+            --external-checks-dir policy \
+            --check "$(echo $GATE_CHECKS | tr -d ' ')" \
+            --compact
+
+      - name: Audit completo (informativo, non blocca)
+        run: checkov -d infra/tf --framework terraform --compact --soft-fail
