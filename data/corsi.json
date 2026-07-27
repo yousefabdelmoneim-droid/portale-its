@@ -2,7 +2,7 @@
   "istituto": "ITS ICT Piemonte",
   "biennio": "2025/2027",
   "corsi": [
-    { "codice": "SOA-FW",  "titolo": "Firewall",                      "ore": 60, "docente": "P. Costanzo" },
+    { "codice": "SOA-FW",  "titolo": "Firewall avanzato",                      "ore": 60, "docente": "P. Costanzo" },
     { "codice": "SOA-SE",  "titolo": "Servizi Esposti",               "ore": 40, "docente": "P. Costanzo" },
     { "codice": "SOA-ID",  "titolo": "Incident Detection & Response", "ore": 36, "docente": "P. Costanzo" },
     { "codice": "ACA-ARC", "titolo": "Architettura e Progettazione",  "ore": 48, "docente": "P. Costanzo" },
