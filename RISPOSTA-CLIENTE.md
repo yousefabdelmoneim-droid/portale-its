@@ -4,7 +4,7 @@
 **ACCETTATA**.  
 Aggiunte le unità "Sicurezza applicativa (30h)" e "Analisi dei dati (45h)" al catalogo.  
 Il totale ore in pagina è passato da 320 a 395.  
-La modifica è stata pubblicata alle 15:52, versione a1b2c3d (inserire SHA reale).  
+La modifica è stata pubblicata alle 15:52, versione 2d52b8c (inserire SHA reale).  
 Da ora la segreteria può fare questa modifica in autonomia in meno di 10 minuti.
 
 ## CR-2 – Caricamento file dal fornitore
@@ -22,4 +22,4 @@ Tempo stimato per implementare: mezza giornata.
 - **Rischio**: con `s3:*` a `Principal "*"` chiunque su internet può modificare o cancellare il sito.
 - **Costo**: è già successo in passato e non esisteva una copia di backup.
 - **Alternativa**: utilizzare il bucket di scambio proposto in CR-2 per il trasferimento dei file.
-- **Evidenza**: abbiamo provato a riaprire il bucket in una PR e la pipeline è diventata rossa (link al run: [inserire URL del run fallito]).
+- **Evidenza**: abbiamo provato a riaprire il bucket in una PR e la pipeline è diventata rossa (link al run: [https://github.com/yousefabdelmoneim-droid/portale-its/actions/runs/30259291384]).
