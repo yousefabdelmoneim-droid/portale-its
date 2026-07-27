@@ -1,5 +1,5 @@
 # PERIZIA - Portale corsi ITS
-Squadra: [inserisci nome squadra]  
+Squadra: yousef abdelmoneim, robero cantore , cristian torres 
 Binario: Terraform  
 Data: 27/07/2026  
 
