@@ -233,23 +233,8 @@ Questo progetto è stato realizzato a scopo didattico per il corso **ITS ICT Pie
 
 **Lab completato!** 🎉
 
-> *"Non avete riscritto niente. Avete cambiato chi decide, cosa è permesso, e cosa succede quando qualcuno sbaglia. Questo è migliorare un'architettura."*
-```
 
----
 
-## 📦 Come aggiungere il README al repository
-
-```bash
-# 1. Crea il file README.md
-nano README.md
-# (copia e incolla il contenuto sopra, salva con CTRL+O, INVIO, CTRL+X)
-
-# 2. Aggiungi, committa e pusha
-git add README.md
-git commit -m "Aggiunto README completo per la consegna"
-git push origin main
-```
 
 ---
 
