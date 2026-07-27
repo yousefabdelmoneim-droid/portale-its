@@ -210,26 +210,9 @@ open dist/index.html
 | **Repository** | [https://github.com/yousefabdelmoneim-droid/portale-its](https://github.com/yousefabdelmoneim-droid/portale-its) |
 | **Sito pubblicato** | [https://yousefabdelmoneim-droid.github.io/portale-its/](https://yousefabdelmoneim-droid.github.io/portale-its/) |
 
----
 
-## 👨‍💻 Autore
 
-**Yousef Abdelmoneim** – [GitHub](https://github.com/yousefabdelmoneim-droid)
 
----
-
-## 📄 Licenza
-
-Questo progetto è stato realizzato a scopo didattico per il corso **ITS ICT Piemonte – AWS Cloud Architect**.
-
----
-
-## 🙏 Ringraziamenti
-
-- **Paolo Costanzo** – Docente del corso
-- **ITS ICT Piemonte** – Ente formativo
-
----
 
 **Lab completato!** 🎉
 
